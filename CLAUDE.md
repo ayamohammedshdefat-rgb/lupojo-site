@@ -21,7 +21,8 @@ Full brief: `docs/BRIEF.md` (authoritative). Brand tokens: `docs/brand-tokens.md
 ## Conventions
 - Arabic-first RTL: `<html lang="ar" dir="rtl">`. Use **logical utilities only** (`ms-/me-/ps-/pe-/start-/end-`).
   Never use `ml-/mr-/left-/right-` for layout.
-- English text goes in `<span lang="en">`, uppercased via CSS, tracked 0.06–0.12em. **Never letter-space Arabic.**
+- English text uses `<En>` (`src/components/ui/En.tsx`: `lang="en" dir="ltr"`, so punctuation isn't bidi-flipped),
+  uppercased via CSS and tracked 0.06–0.12em. **Never letter-space Arabic.**
 - Western digits: `Intl` with `ar-u-nu-latn`. Prices are `2.75 JD` inside `dir="ltr"`. Money is stored as integer fils.
 - Small typed components, no `any`. Every server-only module starts with `import 'server-only'`.
 - All menu content comes from Firestore. `src/i18n/ar.ts` holds UI microcopy only. App code never imports `scripts/seed`.
