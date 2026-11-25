@@ -14,7 +14,10 @@ Full brief: `docs/BRIEF.md` (authoritative). Brand tokens: `docs/brand-tokens.md
 - `npm run dev`: Next dev server (expects emulators running via `npm run emulators`).
 - `npm run emulators`: Firebase Emulator Suite (project `demo-lupo`). It needs Java 21; scripts look for
   `%LOCALAPPDATA%\lupo-tools\jdk21` when `JAVA_HOME` is unset.
-- `npm run seed`: imports `scripts/seed/lupo-menu.json` into the emulators (idempotent).
+  The project path is non-ASCII, so `scripts/with-java.mjs` maps it to a `subst` drive (e.g. `L:\`) for Java.
+- `npm run seed`: imports `scripts/seed/lupo-menu.json` into the emulators (idempotent, `--reset` to wipe).
+  Scripts run with `tsx --conditions=react-server` so they can reuse `src/server/*` (no React imports there:
+  icon keys live in `src/components/icons/keys.ts`).
 - `npm run typecheck && npm run lint && npm test` must pass after every phase. Also `npm run test:rules` and `npm run test:e2e`.
 - `npm run set-role -- --email <e> --role owner|staff|none`.
 

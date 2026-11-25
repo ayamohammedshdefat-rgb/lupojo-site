@@ -1,0 +1,133 @@
+{
+  "site": {
+    "brandName": "LUPO",
+    "metaTitle": "LUPO | المنيو",
+    "metaDescription": "منيو LUPO — برجر، إضافات، مشروبات وصوصات.",
+    "themeColor": "#0b0b0b",
+    "logoUrl": "https://lupojo.netlify.app/assets/dr_burger_logo.png",
+    "taglineEn": "SIMPLE INGREDIENTS. SMASHING TASTE.",
+    "subtaglineAr": "طازج، غني بالنكهة، ويُحضّر عند الطلب.",
+    "subtaglineEn": "Fresh, bold and made to order.",
+    "mission": {
+      "titleAr": "رغبتك.\nمهمتنا.",
+      "titleEn": "YOUR CRAVING. OUR MISSION.",
+      "bodyAr": "مكونات طازجة. سماش بإتقان.",
+      "bodyEn": "Fresh ingredients. Perfectly smashed."
+    },
+    "thanks": {
+      "titleAr": "شكرًا لكم",
+      "titleEn": "THANK YOU FOR CHOOSING LUPO",
+      "bodyAr": "شكرًا لاختياركم LUPO — صُنع بشغف.",
+      "bodyEn": "Made with passion."
+    },
+    "introEnabled": true,
+    "reviews": { "autoApproveComments": false }
+  },
+  "sections": [
+    {
+      "slug": "burgers",
+      "icon": "hamburger",
+      "nameAr": "البرجر",
+      "nameEn": "Burgers",
+      "order": 1,
+      "items": [
+        {
+          "slug": "single-smash",
+          "icon": "hamburger",
+          "nameAr": "سنجل سماش",
+          "nameEn": "Single Smash",
+          "prices": [
+            { "labelAr": "ساندويش", "labelEn": "Sandwich", "amountFils": 2750 },
+            { "labelAr": "وجبة", "labelEn": "Meal", "amountFils": 3500 }
+          ],
+          "image": "https://lupojo.netlify.app/assets/dr_smash.jpg"
+        },
+        {
+          "slug": "double-smash",
+          "icon": "hamburger",
+          "nameAr": "دبل سماش",
+          "nameEn": "Double Smash",
+          "featured": true,
+          "prices": [
+            { "labelAr": "ساندويش", "labelEn": "Sandwich", "amountFils": 3250 },
+            { "labelAr": "وجبة", "labelEn": "Meal", "amountFils": 4000 }
+          ],
+          "image": "https://lupojo.netlify.app/assets/dr_double_smash.jpg"
+        },
+        {
+          "slug": "nashville-chicken",
+          "icon": "drumstick",
+          "nameAr": "ناشفيل تشكن",
+          "nameEn": "Nashville Chicken",
+          "prices": [
+            { "labelAr": "ساندويش", "labelEn": "Sandwich", "amountFils": 3250 },
+            { "labelAr": "وجبة", "labelEn": "Meal", "amountFils": 4000 }
+          ],
+          "image": "https://lupojo.netlify.app/assets/dr_nashville.jpg"
+        },
+        {
+          "slug": "crispy-chicken",
+          "icon": "drumstick",
+          "nameAr": "كرسبي تشكن",
+          "nameEn": "Crispy Chicken",
+          "prices": [
+            { "labelAr": "ساندويش", "labelEn": "Sandwich", "amountFils": 3250 },
+            { "labelAr": "وجبة", "labelEn": "Meal", "amountFils": 4000 }
+          ],
+          "image": "https://lupojo.netlify.app/assets/dr_crispy.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "sides",
+      "icon": "fries",
+      "nameAr": "الإضافات",
+      "nameEn": "Sides",
+      "order": 2,
+      "items": [
+        {
+          "slug": "loaded-fries",
+          "icon": "fries",
+          "nameAr": "لودد فرايز",
+          "nameEn": "Loaded Fries",
+          "prices": [{ "amountFils": 2500 }],
+          "image": "https://lupojo.netlify.app/assets/loaded_fries.jpg"
+        },
+        {
+          "slug": "small-fries",
+          "icon": "fries",
+          "nameAr": "بطاطا صغيرة",
+          "nameEn": "Small Fries",
+          "prices": [{ "amountFils": 600 }],
+          "image": "https://lupojo.netlify.app/assets/small_fries.jpg"
+        },
+        {
+          "slug": "big-fries",
+          "icon": "fries",
+          "nameAr": "بطاطا كبيرة",
+          "nameEn": "Big Fries",
+          "prices": [{ "amountFils": 1000 }],
+          "image": "https://lupojo.netlify.app/assets/large_fries.jpg"
+        }
+      ]
+    },
+    {
+      "slug": "extras",
+      "icon": "cup-soda",
+      "nameAr": "المشروبات والإضافات",
+      "nameEn": "Drinks & Extras",
+      "order": 3,
+      "items": [
+        { "slug": "matrix", "icon": "can-soda", "nameAr": "ماتركس", "nameEn": "Matrix", "prices": [{ "amountFils": 300 }] },
+        { "slug": "sauce", "icon": "sauce-bottle", "nameAr": "صوص", "nameEn": "Sauce", "prices": [{ "amountFils": 300 }] },
+        {
+          "slug": "jalapeno",
+          "icon": "pepper-chilli",
+          "nameAr": "هالبينو",
+          "nameEn": "Jalapeño",
+          "prices": [{ "amountFils": 300 }]
+        }
+      ]
+    }
+  ]
+}

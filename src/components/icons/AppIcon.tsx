@@ -1,5 +1,6 @@
 import { Icon } from 'lucide-react';
-import { ICON_REGISTRY, resolveIconKey, strokeFor } from './registry';
+import { ICON_REGISTRY, strokeFor } from './registry';
+import { resolveIconKey } from './keys';
 
 type AppIconProps = {
   /** Registry key (unknown values fall back to `utensils`). */

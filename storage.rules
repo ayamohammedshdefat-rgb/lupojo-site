@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// Public images are readable by anyone; all writes go through the server (sharp re-encode).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

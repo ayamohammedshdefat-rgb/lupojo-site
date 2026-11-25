@@ -11,15 +11,16 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:rules": "node scripts/with-java.mjs firebase emulators:exec --only firestore,storage --project demo-lupo \"vitest run --config vitest.rules.config.mts\"",
-    "test:e2e": "node scripts/with-java.mjs firebase emulators:exec --only auth,firestore,storage --project demo-lupo \"npm run seed -- --reset && playwright test\"",
-    "emulators": "node scripts/with-java.mjs firebase emulators:start --project demo-lupo --import ./emulator-data --export-on-exit",
-    "seed": "tsx scripts/import-lupo.ts",
-    "seed:prod": "tsx scripts/import-lupo.ts --prod",
-    "set-role": "tsx scripts/set-role.ts",
+    "test:rules": "node scripts/with-java.mjs firebase emulators:exec --only firestore,storage --project demo-lupo \"node scripts/real-cwd.mjs vitest run --config vitest.rules.config.mts\"",
+    "test:e2e": "node scripts/with-java.mjs firebase emulators:exec --only auth,firestore,storage --project demo-lupo \"node scripts/real-cwd.mjs npm run e2e:run\"",
+    "emulators": "node scripts/emulators.mjs",
+    "seed": "tsx --conditions=react-server scripts/import-lupo.ts",
+    "seed:prod": "tsx --conditions=react-server scripts/import-lupo.ts --prod",
+    "set-role": "tsx --conditions=react-server scripts/set-role.ts",
     "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
     "brand:logo": "tsx scripts/brand/logo.ts",
-    "capture": "tsx scripts/reference/capture.ts"
+    "capture": "tsx scripts/reference/capture.ts",
+    "e2e:run": "npm run seed -- --reset && playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.9",
