@@ -6,6 +6,11 @@ const useEmulators = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  cacheLife: {
+    // Menu data: owner edits invalidate by tag immediately; the short revalidate window is a safety
+    // net that self-heals any regeneration race within a minute.
+    menu: { stale: 30, revalidate: 60, expire: 3600 },
+  },
   reactStrictMode: true,
   poweredByHeader: false,
   images: {

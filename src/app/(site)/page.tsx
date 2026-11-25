@@ -1,5 +1,7 @@
 import { UtensilsCrossed } from 'lucide-react';
 import { BackToTop } from '@/components/menu/BackToTop';
+import { INTRO_BOOT_SCRIPT } from '@/components/motion/intro/boot';
+import { IntroOverlay } from '@/components/motion/intro/IntroOverlay';
 import { Hero } from '@/components/menu/Hero';
 import { MenuBrowser } from '@/components/menu/MenuBrowser';
 import { Mission } from '@/components/menu/Mission';
@@ -19,6 +21,18 @@ export default async function HomePage() {
 
   return (
     <SearchProvider>
+      {settings.introEnabled && (
+        <>
+          <IntroOverlay
+            logoUrl={logoUrl}
+            brandName={settings.brandName}
+            taglineEn={settings.taglineEn}
+            subtaglineAr={settings.subtaglineAr}
+          />
+          {/* Picks the intro mode before first paint (sha256 allow-listed in the CSP). */}
+          <script dangerouslySetInnerHTML={{ __html: INTRO_BOOT_SCRIPT }} />
+        </>
+      )}
       <SiteHeader logoUrl={logoUrl} brandName={settings.brandName} />
       <main id="main">
         <Hero settings={settings} logoUrl={logoUrl} featured={featured} />

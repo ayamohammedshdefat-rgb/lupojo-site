@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ItemMedia } from '@/components/item/ItemMedia';
+import { SharedSource } from '@/components/motion/shared-element';
 import { ItemBadge, TopRatedBadge, UnavailableBadge } from '@/components/ui/Badges';
 import { RatingChip } from '@/components/ui/RatingChip';
 import { En } from '@/components/ui/En';
@@ -18,10 +19,12 @@ export function ItemCard({ item, priority }: { item: MenuItem; priority?: boolea
       scroll={false}
       aria-label={ar.item.openDetails(item.nameAr)}
       data-item-card={item.slug}
-      className={`group lupo-card glass relative flex h-full flex-col rounded-card p-2 shadow-card transition-[translate,scale,background-color] duration-320 ease-lupo hover:-translate-y-1 hover:bg-white/[0.07] active:scale-[0.97] ${unavailable ? 'is-unavailable' : ''}`}
+      className={`group lupo-card glass relative isolate flex h-full flex-col rounded-card p-2 shadow-card transition-[translate,scale,background-color] duration-320 ease-lupo hover:-translate-y-1 hover:bg-white/[0.07] active:scale-[0.97] ${unavailable ? 'is-unavailable' : ''}`}
     >
       <div className={`relative ${unavailable ? 'grayscale' : ''}`}>
-        <ItemMedia item={item} sizes={CARD_SIZES} priority={priority} />
+        <SharedSource kind="media">
+          <ItemMedia item={item} sizes={CARD_SIZES} priority={priority} />
+        </SharedSource>
         <div className="absolute inset-x-2 top-2 flex flex-wrap items-start gap-1">
           {unavailable && <UnavailableBadge />}
           {!unavailable && item.topRated && <TopRatedBadge />}
@@ -30,7 +33,9 @@ export function ItemCard({ item, priority }: { item: MenuItem; priority?: boolea
       </div>
 
       <div className="flex flex-1 flex-col gap-1 px-2 pt-3 pb-2">
-        <h3 className="text-[15px] leading-heading font-bold text-fg sm:text-base">{item.nameAr}</h3>
+        <SharedSource kind="title" className="w-fit">
+          <h3 className="text-[15px] leading-heading font-bold text-fg sm:text-base">{item.nameAr}</h3>
+        </SharedSource>
         <En className="font-cairo-light text-[10px] leading-ui text-muted sm:text-[11px]">{item.nameEn}</En>
         {item.taglineAr && <p className="line-clamp-1 text-xs leading-ui text-muted">{item.taglineAr}</p>}
         <div className="mt-auto flex flex-col gap-1.5 pt-2">

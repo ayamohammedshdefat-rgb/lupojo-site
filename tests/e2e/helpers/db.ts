@@ -4,7 +4,7 @@
  */
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
-import type { APIRequestContext } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 
 process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8080';
 process.env.FIREBASE_AUTH_EMULATOR_HOST ||= '127.0.0.1:9099';
@@ -66,10 +66,23 @@ export async function updateSection(slug: string, data: Record<string, unknown>)
   await testDb().doc(`sections/${section.id}`).update(data);
 }
 
-/** Expires the app's cached menu so the next request reads the fixture. */
-export async function revalidate(request: APIRequestContext, tags: string[] = ['menu']) {
+/**
+ * Expires the app's cached menu so the next request reads the fixture, then warms the affected
+ * prerendered pages (ISR serves one stale render while it regenerates in the background).
+ */
+export async function revalidate(request: APIRequestContext, tags: string[] = ['menu'], warm: string[] = ['/']) {
   const res = await request.post('/api/test/revalidate', { data: { tags } });
   if (!res.ok()) throw new Error(`revalidate failed: ${res.status()}`);
+  for (const path of warm) await request.get(path);
+  await new Promise((r) => setTimeout(r, 400));
+  for (const path of warm) await request.get(path);
+}
+
+/** Navigates and waits until React has hydrated (clicks before that would do native navigations). */
+export async function gotoReady(page: Page, url: string) {
+  const res = await page.goto(url);
+  await page.waitForSelector('html[data-hydrated]', { state: 'attached' });
+  return res;
 }
 
 /** Puts every item and section back to visible + available. */

@@ -60,6 +60,41 @@ UI 1.35, headings 1.25, display 1.1. Tracking is applied only to uppercase Engli
 - Film grain is SVG noise at ~4% opacity.
 - Deep drop-shadows sit under floating food, and on desktop a pointer spotlight follows card borders.
 
+## Motion
+
+| Token | Value |
+|---|---|
+| Ease | `cubic-bezier(0.16, 1, 0.3, 1)` (`--ease-lupo`) |
+| Springs | UI `{ stiffness: 420, damping: 32 }` · soft `{ stiffness: 140, damping: 20 }` |
+| Durations | 180 / 320 / 600 ms |
+| Properties | transform and opacity only. The single exception is the sliding chip/rail pill, which also animates the width of one small out-of-flow element. |
+
+**Intro "THE SMASH"** (`src/components/motion/intro/`) runs as a pure-CSS timeline that starts at first paint:
+- The ball drops and squashes, with a 3px shake, a shockwave and 20–30 sparks.
+- A circular mask reveals the logo (1.08 → 1), followed by a diagonal sweep.
+- The tagline words stagger in, then the logo flies to the hero.
+
+An inline boot script picks the mode before paint:
+- **full**: first visit ever, about 2.4 s.
+- **pulse**: later sessions, 500 ms.
+- **reduced**: 200 ms fade.
+- **none**: already seen this session.
+
+Tap or any key fast-forwards the intro to its end in 250 ms. A CSS failsafe hides everything by 2.6 s.
+
+**Card → detail** uses a shared-element flight: a FLIP "ghost" clone driven by the Web Animations API, so no container can clip it. It flies back into the card on close.
+
+**Scroll** effects are CSS view timelines (no JS, never hidden without support):
+- staggered card reveal
+- title mask slide-up
+- distribution bars
+- hero-logo exit
+- kinetic mission words
+
+The giant outlined section words are a rAF marquee whose speed follows scroll velocity. Header docking is driven by one `--dock` CSS variable.
+
+**Why so little JS:** the public first-load budget is ≤ 180 KB gzip. Motion's runtime (about 46 KB) is kept off the public critical path; `/` ships **165.6 KB** (`node scripts/perf/measure-js.mjs`). The `motion` library is reserved for the lazily loaded surfaces: the rating sheet and the admin.
+
 ## Live-site vs. Appendix A: differences found (live site wins)
 
 1. **Mission title**: the live page renders "رغبتك." (small accent line) followed by "مهمتنا." (large heading).

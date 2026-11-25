@@ -1,0 +1,386 @@
+/*
+ * "THE SMASH" intro. The timeline is pure CSS so it starts at first paint, independent of hydration.
+ * The inline boot script sets data-mode (full | pulse | reduced | none); JS only adds sparks,
+ * the skip fast-forward and the logo's flight to the hero. A failsafe hides everything by 2.6 s.
+ *
+ * Full timeline (ms): 0-150 black + embers · 150-650 ball drops & stretches · 650 IMPACT
+ * (squash, 3px shake, shockwave, sparks) · 800-1300 circular mask reveals the logo (1.08 -> 1)
+ * + diagonal sweep · 1300-1900 tagline words stagger, Arabic line fades up · 1900-2400 logo
+ * flies to the hero, overlay dissolves, the hero staggers in.
+ */
+
+.lupo-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  contain: strict;
+  color: #f6f1e9;
+  cursor: default;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  animation: lupo-intro-gone 0.35s ease 2.6s forwards;
+}
+.lupo-intro[data-mode='none'] {
+  display: none;
+}
+
+.lupo-intro__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 45% at 50% 52%, rgb(227 111 18 / 0.16), transparent 70%),
+    #0b0b0b;
+}
+.lupo-intro__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.lupo-intro__stage {
+  position: relative;
+  display: flex;
+  width: min(560px, 86vw);
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.lupo-intro__logo-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1376 / 404;
+}
+.lupo-intro__logo-wrap {
+  position: absolute;
+  inset: 0;
+}
+.lupo-intro__logo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.lupo-intro__drop,
+.lupo-intro__ring,
+.lupo-intro__flash,
+.lupo-intro__sweep,
+.lupo-intro__hint {
+  display: none;
+}
+.lupo-intro__tagline {
+  font-weight: 900;
+  line-height: 1.1;
+  font-size: clamp(20px, 5.4vw, 30px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lupo-intro__word {
+  display: inline-block;
+  margin-inline: 0.18em;
+}
+.lupo-intro__sub {
+  font-weight: 600;
+  line-height: 1.65;
+  font-size: clamp(14px, 3.8vw, 17px);
+  color: rgb(246 241 233 / 0.8);
+}
+
+/* ---------- full ---------- */
+.lupo-intro[data-mode='full'] .lupo-intro__stage {
+  animation: lupo-shake 120ms linear 650ms;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__drop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: lupo-drop 500ms cubic-bezier(0.55, 0, 0.9, 0.45) 150ms both;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__ball {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 0 22px rgb(239 135 21 / 0.75));
+  animation: lupo-ball 800ms linear 150ms both;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__ring {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  display: block;
+  width: 70px;
+  height: 70px;
+  margin: -35px 0 0 -35px;
+  border-radius: 50%;
+  border: 2px solid rgb(255 194 61 / 0.9);
+  box-shadow:
+    0 0 24px rgb(239 135 21 / 0.7),
+    inset 0 0 18px rgb(239 135 21 / 0.5);
+  opacity: 0;
+  animation: lupo-ring 650ms cubic-bezier(0.16, 1, 0.3, 1) 650ms forwards;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__flash {
+  position: absolute;
+  inset: -40% -10%;
+  display: block;
+  background: radial-gradient(closest-side, rgb(255 214 150 / 0.55), rgb(239 135 21 / 0.18) 55%, transparent);
+  animation: lupo-flash 520ms ease-out 650ms both;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__logo-wrap {
+  clip-path: circle(0% at 50% 50%);
+  animation: lupo-reveal 560ms cubic-bezier(0.16, 1, 0.3, 1) 800ms forwards;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__logo {
+  animation: lupo-pop 650ms cubic-bezier(0.16, 1, 0.3, 1) 800ms both;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__sweep {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  mask: var(--logo-mask) center / contain no-repeat;
+  -webkit-mask: var(--logo-mask) center / contain no-repeat;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__sweep::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: -35%;
+  width: 30%;
+  background: linear-gradient(100deg, transparent, rgb(255 240 214 / 0.9), transparent);
+  transform: skewX(-18deg);
+  animation: lupo-sweep 520ms ease-in-out 1080ms both;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__word {
+  animation: lupo-word 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(1300ms + var(--i, 0) * 90ms);
+}
+.lupo-intro[data-mode='full'] .lupo-intro__sub {
+  animation: lupo-word 520ms cubic-bezier(0.16, 1, 0.3, 1) 1560ms both;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__hint {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgb(246 241 233 / 0.55);
+  animation:
+    lupo-fade-in 400ms ease 450ms both,
+    lupo-fade-out 300ms ease 1850ms forwards;
+}
+/* Dissolve: background, copy and (without JS) the logo fade; the overlay disappears at 2.45 s. */
+.lupo-intro[data-mode='full'] .lupo-intro__bg,
+.lupo-intro[data-mode='full'] .lupo-intro__canvas {
+  animation: lupo-dissolve 500ms ease 1900ms forwards;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__copy {
+  animation: lupo-dissolve 360ms ease 1900ms forwards;
+}
+.lupo-intro[data-mode='full'] .lupo-intro__logo-box {
+  animation: lupo-dissolve 450ms ease 1950ms forwards;
+}
+.lupo-intro[data-mode='full'] {
+  animation: lupo-intro-gone 0.01s linear 2.45s forwards;
+}
+
+/* ---------- pulse (later sessions): 500 ms glow pulse ---------- */
+.lupo-intro[data-mode='pulse'] .lupo-intro__copy {
+  display: none;
+}
+.lupo-intro[data-mode='pulse'] .lupo-intro__logo {
+  animation: lupo-glow 500ms ease-in-out both;
+}
+.lupo-intro[data-mode='pulse'] .lupo-intro__bg,
+.lupo-intro[data-mode='pulse'] .lupo-intro__logo-box {
+  animation: lupo-dissolve 200ms ease 420ms forwards;
+}
+.lupo-intro[data-mode='pulse'] {
+  animation: lupo-intro-gone 0.01s linear 0.62s forwards;
+}
+
+/* ---------- reduced motion: 200 ms fade, nothing else ---------- */
+.lupo-intro[data-mode='reduced'] .lupo-intro__copy {
+  display: none;
+}
+.lupo-intro[data-mode='reduced'] {
+  animation: lupo-fade-out 200ms ease forwards;
+}
+
+/* While the intro plays: lock scroll (with a failsafe) and hold the hero until the logo lands. */
+html:has(#lupo-intro[data-mode='full']) {
+  overflow: hidden;
+  animation: lupo-unlock 2.6s step-end both;
+}
+html:has(#lupo-intro[data-mode='full']) #hero-logo {
+  animation: lupo-hold 0s linear 2.4s both;
+}
+html:has(#lupo-intro[data-mode='full']) [data-stagger] {
+  animation: lupo-word 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(1950ms + var(--i, 0) * 80ms);
+}
+html:has(#lupo-intro[data-mode='pulse']) #hero-logo {
+  animation: lupo-hold 0s linear 0.5s both;
+}
+
+@keyframes lupo-intro-gone {
+  to {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+@keyframes lupo-unlock {
+  to {
+    overflow: visible;
+  }
+}
+@keyframes lupo-hold {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lupo-shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3px, 2px);
+  }
+  50% {
+    transform: translate(3px, -2px);
+  }
+  75% {
+    transform: translate(-2px, -3px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+@keyframes lupo-drop {
+  from {
+    transform: translateY(-62vh);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+/* 150 -> 950 ms: stretch while falling, squash on impact (62.5% = 650 ms), melt into light. */
+@keyframes lupo-ball {
+  0% {
+    transform: scale(0.9, 1.1);
+    opacity: 1;
+  }
+  56% {
+    transform: scale(0.78, 1.32);
+  }
+  62.5% {
+    transform: scale(1.15, 0.86);
+  }
+  69% {
+    transform: scale(2.6, 0.3);
+  }
+  81% {
+    transform: scale(2.8, 0.26);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4.2, 0.18);
+    opacity: 0;
+  }
+}
+@keyframes lupo-ring {
+  from {
+    transform: scale(0.2);
+    opacity: 0.95;
+  }
+  to {
+    transform: scale(7);
+    opacity: 0;
+  }
+}
+@keyframes lupo-flash {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes lupo-reveal {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+@keyframes lupo-pop {
+  0% {
+    transform: scale(0.94);
+  }
+  55% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes lupo-sweep {
+  from {
+    transform: translateX(0) skewX(-18deg);
+  }
+  to {
+    transform: translateX(520%) skewX(-18deg);
+  }
+}
+@keyframes lupo-word {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes lupo-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgb(239 135 21 / 0));
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgb(239 135 21 / 0.85));
+  }
+}
+@keyframes lupo-dissolve {
+  to {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+@keyframes lupo-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes lupo-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

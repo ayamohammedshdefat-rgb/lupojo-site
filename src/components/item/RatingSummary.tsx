@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
 import { Stars } from '@/components/ui/Stars';
+import { CountUp } from '@/components/motion/CountUp';
 import { formatInt, formatRating, formatRatingCount } from '@/lib/format';
 import type { ItemStats, StarKey } from '@/types/menu';
 
@@ -17,7 +18,7 @@ export function RatingSummary({ stats, avg }: { stats: ItemStats; avg: number })
           className="tabular font-cairo-extralight text-[64px] leading-display text-fg"
           aria-label={`متوسط التقييم ${formatRating(avg)} من 5`}
         >
-          {formatRating(avg)}
+          <CountUp value={avg} kind="rating" />
         </span>
         <Stars value={avg} size={16} />
         <span data-count className="mt-1 text-xs leading-ui font-cairo-light text-muted">

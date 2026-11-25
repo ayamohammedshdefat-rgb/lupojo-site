@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import { ChevronDown, Flame } from 'lucide-react';
 import { ItemMedia } from '@/components/item/ItemMedia';
+import { Embers } from '@/components/motion/Embers';
+import { HeroTilt } from '@/components/motion/HeroTilt';
 import { En } from '@/components/ui/En';
 import { RatingChip } from '@/components/ui/RatingChip';
 import { ar } from '@/i18n/ar';
@@ -20,18 +23,19 @@ export function Hero({ settings, logoUrl, featured }: HeroProps) {
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 mx-auto h-[620px] max-w-[1100px] bg-[radial-gradient(closest-side,rgb(227_111_18/0.22),transparent)]"
       />
+      <Embers className="absolute inset-0 -z-10 h-full w-full" />
       <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-4 pt-6 pb-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12 lg:px-8 lg:pt-10 lg:pb-16">
         <div className="flex flex-col items-center text-center lg:items-start lg:text-start">
           {settings.taglineEn && (
-            <En as="p" className="text-[25px] leading-display font-black text-fg sm:text-4xl lg:text-[44px]">
+            <En as="p" data-stagger style={{ '--i': 0 } as CSSProperties} className="text-[25px] leading-display font-black text-fg sm:text-4xl lg:text-[44px]">
               {settings.taglineEn}
             </En>
           )}
           {settings.subtaglineAr && (
-            <p className="mt-3 text-[15px] leading-ar font-semibold text-fg/85 sm:text-lg">{settings.subtaglineAr}</p>
+            <p data-stagger style={{ '--i': 1 } as CSSProperties} className="mt-3 text-[15px] leading-ar font-semibold text-fg/85 sm:text-lg">{settings.subtaglineAr}</p>
           )}
           {settings.subtaglineEn && (
-            <En as="p" caps={false} className="font-cairo-light text-sm leading-ui text-muted">
+            <En as="p" caps={false} data-stagger style={{ '--i': 2 } as CSSProperties} className="font-cairo-light text-sm leading-ui text-muted">
               {settings.subtaglineEn}
             </En>
           )}
@@ -49,6 +53,8 @@ export function Hero({ settings, logoUrl, featured }: HeroProps) {
           </h1>
           <a
             href="#menu"
+            data-stagger
+            style={{ '--i': 4 } as CSSProperties}
             className="group mt-8 inline-flex flex-col items-center gap-1 text-sm leading-ui font-semibold text-muted transition-colors hover:text-fg max-lg:hidden"
           >
             {ar.menu.browse}
@@ -60,15 +66,19 @@ export function Hero({ settings, logoUrl, featured }: HeroProps) {
           <Link
             href={`/item/${featured.slug}`}
             scroll={false}
+            data-stagger
+            style={{ '--i': 3 } as CSSProperties}
             className="group relative mx-auto block w-full max-w-[420px] lg:max-w-[500px]"
             aria-label={ar.item.openDetails(featured.nameAr)}
           >
             <div aria-hidden="true" className="glow-accent animate-breathe absolute -inset-[18%] -z-10 rounded-full blur-2xl" />
-            <div className="animate-float">
-              <div className="-rotate-2 shadow-float transition-transform duration-600 ease-lupo group-hover:rotate-0">
-                <ItemMedia item={featured} variant="detail" sizes="(min-width: 1024px) 500px, 90vw" priority />
+            <HeroTilt>
+              <div className="animate-float">
+                <div className="-rotate-2 shadow-float transition-transform duration-600 ease-lupo group-hover:rotate-0">
+                  <ItemMedia item={featured} variant="detail" sizes="(min-width: 1024px) 500px, 90vw" priority />
+                </div>
               </div>
-            </div>
+            </HeroTilt>
             <div className="glass-strong relative -mt-14 ms-auto me-4 flex w-[78%] items-center gap-3 rounded-[24px] p-3 ps-4 shadow-card">
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="inline-flex items-center gap-1 text-[11px] leading-ui font-semibold text-gold">
@@ -90,6 +100,8 @@ export function Hero({ settings, logoUrl, featured }: HeroProps) {
 
         <a
           href="#menu"
+          data-stagger
+          style={{ '--i': 4 } as CSSProperties}
           className="mx-auto inline-flex flex-col items-center gap-1 text-sm leading-ui font-semibold text-muted lg:hidden"
         >
           {ar.menu.browse}

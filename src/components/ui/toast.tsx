@@ -1,12 +1,10 @@
 'use client';
 
 import { CircleAlert, CircleCheck, Info } from 'lucide-react';
-import { AnimatePresence, m } from 'motion/react';
 import { useEffect, useSyncExternalStore } from 'react';
-import { SPRING_UI } from '@/lib/motion-tokens';
 
 type Tone = 'success' | 'error' | 'info';
-type ToastItem = { id: number; message: string; tone: Tone; action?: { label: string; onClick: () => void } };
+type ToastItem = { id: number; message: string; tone: Tone; leaving?: boolean; action?: { label: string; onClick: () => void } };
 
 let items: ToastItem[] = [];
 let nextId = 1;
@@ -19,14 +17,23 @@ export function toast(message: string, tone: Tone = 'success', action?: ToastIte
   emit();
   return id;
 }
+
+/** Plays the exit animation, then removes the toast. */
 export function dismissToast(id: number) {
-  items = items.filter((t) => t.id !== id);
+  if (!items.some((t) => t.id === id && !t.leaving)) return;
+  items = items.map((t) => (t.id === id ? { ...t, leaving: true } : t));
   emit();
+  window.setTimeout(() => {
+    items = items.filter((t) => t.id !== id);
+    emit();
+  }, 220);
 }
 
 const subscribe = (l: () => void) => {
   listeners.add(l);
-  return () => listeners.delete(l);
+  return () => {
+    listeners.delete(l);
+  };
 };
 
 const ICONS = { success: CircleCheck, error: CircleAlert, info: Info } as const;
@@ -34,18 +41,14 @@ const COLORS = { success: 'text-success', error: 'text-danger', info: 'text-acce
 
 function ToastRow({ t }: { t: ToastItem }) {
   useEffect(() => {
-    const timer = setTimeout(() => dismissToast(t.id), t.action ? 6000 : 3500);
-    return () => clearTimeout(timer);
+    const timer = window.setTimeout(() => dismissToast(t.id), t.action ? 6000 : 3500);
+    return () => window.clearTimeout(timer);
   }, [t.id, t.action]);
   const Icon = ICONS[t.tone];
   return (
-    <m.li
-      layout
-      initial={{ opacity: 0, y: 16, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 8, scale: 0.96 }}
-      transition={SPRING_UI}
-      className="glass-strong pointer-events-auto flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm leading-ui text-fg shadow-card"
+    <li
+      data-leaving={t.leaving ? '' : undefined}
+      className="lupo-toast glass-strong pointer-events-auto flex items-center gap-3 rounded-[20px] px-4 py-3 text-sm leading-ui text-fg shadow-card"
     >
       <Icon size={20} strokeWidth={1.75} className={COLORS[t.tone]} aria-hidden="true" />
       <span className="flex-1">{t.message}</span>
@@ -61,21 +64,23 @@ function ToastRow({ t }: { t: ToastItem }) {
           {t.action.label}
         </button>
       )}
-    </m.li>
+    </li>
   );
 }
 
-/** Mount once per layout. Announces messages politely to screen readers. */
+/** Mount once in the root layout. Announces messages politely to screen readers. */
 export function Toaster() {
   const list = useSyncExternalStore(subscribe, () => items, () => items);
   return (
-    <div aria-live="polite" role="status" className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[80] flex justify-center px-4">
+    <div
+      aria-live="polite"
+      role="status"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[80] flex justify-center px-4"
+    >
       <ul className="flex w-full max-w-md flex-col gap-2">
-        <AnimatePresence initial={false}>
-          {list.map((t) => (
-            <ToastRow key={t.id} t={t} />
-          ))}
-        </AnimatePresence>
+        {list.map((t) => (
+          <ToastRow key={t.id} t={t} />
+        ))}
       </ul>
     </div>
   );

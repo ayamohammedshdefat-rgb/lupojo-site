@@ -16,7 +16,7 @@ export type { ItemContext };
 export async function getPublicMenu(): Promise<PublicMenu> {
   'use cache';
   cacheTag(TAGS.menu, TAGS.settings);
-  cacheLife('hours');
+  cacheLife('menu');
 
   const db = adminDb();
   const [settingsSnap, sectionsSnap, itemsSnap, statsSnap] = await Promise.all([

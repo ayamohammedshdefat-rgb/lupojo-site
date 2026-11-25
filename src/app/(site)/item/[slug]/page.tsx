@@ -11,7 +11,10 @@ import { DEFAULT_MARK, logoUrlOf } from '@/lib/brand';
 import { formatPriceList } from '@/lib/format';
 import { getPublicItem, getPublicItemSlugs, getSiteSettings } from '@/server/repos/menu';
 
-/** Deep links block on params so hidden/unknown slugs get a real 404 status (in-app navigation uses the modal). */
+/**
+ * Visible items are prerendered (fast static deep links). Hidden/unknown slugs get their 404
+ * status from the proxy (src/proxy.ts); notFound() here still renders the branded page.
+ */
 export const instant = false;
 
 export async function generateStaticParams() {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { formatJD, restoreMenu, revalidate, updateItem, updateSection, visibleItems } from './helpers/db';
+import { formatJD, gotoReady, restoreMenu, revalidate, updateItem, updateSection, visibleItems } from './helpers/db';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -15,19 +15,20 @@ test.afterAll(async ({ request }) => {
 test('every visible item opens its detail (modal + deep link) with the right name and prices', async ({ page }) => {
   const items = await visibleItems();
   expect(items.length).toBeGreaterThan(0);
-  await page.goto('/');
+  await gotoReady(page, '/');
 
   for (const item of items) {
     const card = page.locator(`[data-item-card="${item.slug}"]`);
     await card.scrollIntoViewIfNeeded();
     await card.click();
     await expect(page).toHaveURL(new RegExp(`/item/${item.slug}$`));
-    const modal = page.locator('[data-item-modal]');
-    await expect(modal.locator('[data-item-name]')).toHaveText(item.nameAr);
+    const modal = page.locator('[data-item-modal]:visible');
+    await expect(modal.locator('[data-item-name]:visible')).toHaveText(item.nameAr);
     for (const p of item.prices) await expect(modal).toContainText(formatJD(p.amountFils));
     await page.keyboard.press('Escape');
     await expect(page).toHaveURL(/\/$/);
-    await expect(modal).toHaveCount(0);
+    // With Cache Components the closed modal may stay mounted but hidden (React Activity).
+    await expect(page.locator('[data-item-modal]:visible')).toHaveCount(0);
   }
 
   for (const item of items) {
@@ -38,7 +39,7 @@ test('every visible item opens its detail (modal + deep link) with the right nam
 });
 
 test('search filters cards with Arabic normalization and shows an empty state', async ({ page, isMobile }) => {
-  await page.goto('/');
+  await gotoReady(page, '/');
   if (isMobile) await page.getByRole('button', { name: 'ابحث في المنيو' }).click();
   const input = page.getByRole('searchbox', { name: 'ابحث في المنيو' }).last();
   await input.fill('سماش');
@@ -56,7 +57,7 @@ test('hidden items and sections are never exposed', async ({ page, request }) =>
   await updateItem('crispy-chicken', { visibility: 'hidden' });
   await revalidate(request);
 
-  await page.goto('/');
+  await gotoReady(page, '/');
   await expect(page.locator('[data-item-card="crispy-chicken"]')).toHaveCount(0);
   expect(await page.content()).not.toContain('كرسبي تشكن');
   const res = await page.goto('/item/crispy-chicken');
@@ -64,25 +65,25 @@ test('hidden items and sections are never exposed', async ({ page, request }) =>
 
   await updateSection('sides', { visibility: 'hidden' });
   await revalidate(request);
-  await page.goto('/');
+  await gotoReady(page, '/');
   await expect(page.locator('#sides')).toHaveCount(0);
   await expect(page.locator('[data-item-card="loaded-fries"]')).toHaveCount(0);
   expect((await page.goto('/item/loaded-fries'))?.status()).toBe(404);
 
   await restoreMenu(request);
-  await page.goto('/');
+  await gotoReady(page, '/');
   await expect(page.locator('[data-item-card="crispy-chicken"]')).toHaveCount(1);
 });
 
 test('unavailable items stay visible with a clear state and no rating', async ({ page, request }) => {
   await updateItem('nashville-chicken', { availability: 'unavailable', unavailableNote: 'يعود قريبًا' });
-  await revalidate(request);
+  await revalidate(request, ['menu'], ['/', '/item/nashville-chicken']);
 
-  await page.goto('/');
+  await gotoReady(page, '/');
   const card = page.locator('[data-item-card="nashville-chicken"]');
   await expect(card).toContainText('غير متوفر حاليًا');
   await card.click();
-  const modal = page.locator('[data-item-modal]');
+  const modal = page.locator('[data-item-modal]:visible');
   await expect(modal).toContainText('يعود قريبًا');
   await expect(modal.getByRole('button', { name: 'قيّم هذا الصنف' })).toBeDisabled();
 
@@ -90,7 +91,7 @@ test('unavailable items stay visible with a clear state and no rating', async ({
 });
 
 test('section navigation scrolls to the section and highlights it', async ({ page, isMobile }) => {
-  await page.goto('/');
+  await gotoReady(page, '/');
   const nav = page.getByRole('navigation', { name: 'أقسام المنيو' }).filter({ visible: true }).first();
   await nav.locator('a[href="#extras"]').click();
   await expect(page).toHaveURL(/#extras$/);

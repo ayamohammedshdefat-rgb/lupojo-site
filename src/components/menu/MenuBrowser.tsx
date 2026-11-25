@@ -1,9 +1,10 @@
 'use client';
 
 import { SearchX } from 'lucide-react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { matchesQuery } from '@/lib/arabic';
 import { ar } from '@/i18n/ar';
+import { rememberSource } from '@/components/motion/shared-element';
 import type { MenuSection } from '@/types/menu';
 import { ItemCard } from './ItemCard';
 import { SectionChips } from './SectionChips';
@@ -35,6 +36,36 @@ export function MenuBrowser({ sections }: { sections: MenuSection[] }) {
     [indexed, q],
   );
   const total = filtered.reduce((n, s) => n + s.visible.size, 0);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // Pointer-following border spotlight (desktop): one delegated listener sets --mx/--my on the hovered card.
+  // Shared-element source: remember where the pressed card's image/title are (capture phase,
+  // before the Link navigates and the modal mounts).
+  useEffect(() => {
+    const root = gridRef.current;
+    if (!root) return;
+    const onClick = (e: MouseEvent) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>('[data-item-card]');
+      const slug = card?.dataset.itemCard;
+      if (card && slug) rememberSource(card, slug);
+    };
+    root.addEventListener('click', onClick, { capture: true });
+    return () => root.removeEventListener('click', onClick, { capture: true });
+  }, []);
+
+  useEffect(() => {
+    const root = gridRef.current;
+    if (!root || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const onMove = (e: PointerEvent) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.lupo-card');
+      if (!card) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+    };
+    root.addEventListener('pointermove', onMove, { passive: true });
+    return () => root.removeEventListener('pointermove', onMove);
+  }, []);
 
   return (
     <>
@@ -44,7 +75,7 @@ export function MenuBrowser({ sections }: { sections: MenuSection[] }) {
         className="mx-auto grid max-w-[1280px] gap-8 px-4 pt-8 pb-16 lg:grid-cols-[248px_minmax(0,1fr)] lg:gap-10 lg:px-8 lg:pt-12"
       >
         <SideRail sections={sections} active={active} />
-        <div className="flex min-w-0 flex-col gap-14 lg:gap-20">
+        <div ref={gridRef} className="flex min-w-0 flex-col gap-14 lg:gap-20">
           {q && (
             <p role="status" aria-live="polite" className="sr-only">
               {total === 0 ? ar.search.empty : `${total}`}
@@ -60,7 +91,12 @@ export function MenuBrowser({ sections }: { sections: MenuSection[] }) {
               <SectionHeader section={s} />
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                 {s.items.map(({ item }, idx) => (
-                  <li key={item.id} hidden={!s.visible.has(item.id)} data-search-item={item.slug}>
+                  <li
+                    key={item.id}
+                    hidden={!s.visible.has(item.id)}
+                    data-search-item={item.slug}
+                    style={{ '--i': idx % 4 } as CSSProperties}
+                  >
                     <ItemCard item={item} priority={s === filtered[0] && idx < 2} />
                   </li>
                 ))}

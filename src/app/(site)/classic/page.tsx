@@ -123,7 +123,7 @@ export default async function ClassicPage() {
         {sections.map((s, i) => (
           <a
             key={s.id}
-            href={`#${s.slug}`}
+            href={`#classic-${s.slug}`}
             className={`flex shrink-0 items-center gap-2 rounded-full border bg-[#141414] px-3.5 py-2 text-fg ${i === 0 ? 'border-accent' : 'border-white/15'}`}
           >
             <AppIcon name={s.icon} size={18} />
@@ -140,7 +140,7 @@ export default async function ClassicPage() {
           const withPhoto = s.items.filter((i) => i.image || i.cutout);
           const plain = s.items.filter((i) => !i.image && !i.cutout);
           return (
-            <section key={s.id} id={`${s.slug}`} className="scroll-mt-4 bg-black/50 px-3.5 pt-8 pb-11 sm:px-7 sm:pt-12 print:bg-white print:py-4">
+            <section key={s.id} id={`classic-${s.slug}`} className="scroll-mt-4 bg-black/50 px-3.5 pt-8 pb-11 sm:px-7 sm:pt-12 print:bg-white print:py-4">
               <div className="mx-auto mb-5 flex max-w-[1100px] items-center gap-2.5">
                 <AppIcon name={s.icon} size={28} className="text-accent-hi print:text-black" />
                 <div>

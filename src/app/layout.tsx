@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { cairo, cairoThin } from '@/lib/fonts';
-import { MotionProvider } from '@/components/motion/MotionProvider';
 import { Toaster } from '@/components/ui/toast';
+import { HydrationMarker } from '@/components/ui/HydrationMarker';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -16,12 +16,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="ar" dir="rtl" className={`${cairo.variable} ${cairoThin.variable}`}>
+    <html lang="ar" dir="rtl" className={`${cairo.variable} ${cairoThin.variable}`} suppressHydrationWarning>
       <body className="bg-canvas font-sans text-fg antialiased">
-        <MotionProvider>
-          {children}
-          <Toaster />
-        </MotionProvider>
+        {children}
+        <Toaster />
+        <HydrationMarker />
         <div className="lupo-grain" aria-hidden="true" />
       </body>
     </html>

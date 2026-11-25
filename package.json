@@ -20,7 +20,10 @@
     "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
     "brand:logo": "tsx scripts/brand/logo.ts",
     "capture": "tsx scripts/reference/capture.ts",
-    "e2e:run": "npm run seed -- --reset && playwright test"
+    "e2e:run": "npm run seed -- --reset && playwright test",
+    "test:rules:attached": "vitest run --config vitest.rules.config.mts",
+    "perf:js": "node scripts/perf/measure-js.mjs",
+    "checkpoint": "tsx scripts/reference/checkpoint.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.9",

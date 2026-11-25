@@ -3,7 +3,8 @@ import { ItemMedia } from './ItemMedia';
 import { PricePills } from './PricePills';
 import { RatingSummary } from './RatingSummary';
 import { RelatedRow } from './RelatedRow';
-import { MODAL_TITLE_ID } from './modal-ids';
+import { modalTitleId } from './modal-ids';
+import { SharedTarget } from '@/components/motion/shared-element';
 import { ItemBadge, TopRatedBadge, UnavailableBadge } from '@/components/ui/Badges';
 import { En } from '@/components/ui/En';
 import { RateCta } from '@/components/rating/RateCta';
@@ -16,6 +17,8 @@ export function ItemDetail({ ctx, headingLevel = 'h1' }: { ctx: ItemContext; hea
   const { item } = ctx;
   const unavailable = item.availability === 'unavailable';
   const Title = headingLevel;
+  // In the modal (h2) the image and title are shared elements that fly in from the card.
+  const shared = headingLevel === 'h2';
 
   return (
     <div className="flex flex-col gap-10" data-item-detail={item.slug}>
@@ -23,7 +26,13 @@ export function ItemDetail({ ctx, headingLevel = 'h1' }: { ctx: ItemContext; hea
         <div className="relative isolate self-start md:sticky md:top-4">
           <div aria-hidden="true" className="glow-accent animate-breathe absolute -inset-[12%] -z-10 rounded-full opacity-80 blur-2xl" />
           <div className={unavailable ? 'grayscale' : ''}>
-            <ItemMedia item={item} variant="detail" sizes="(min-width: 768px) 440px, 92vw" priority />
+            {shared ? (
+              <SharedTarget slug={item.slug} kind="media">
+                <ItemMedia item={item} variant="detail" sizes="(min-width: 768px) 440px, 92vw" priority />
+              </SharedTarget>
+            ) : (
+              <ItemMedia item={item} variant="detail" sizes="(min-width: 768px) 440px, 92vw" priority />
+            )}
           </div>
           <div className="absolute inset-x-3 top-3 flex flex-wrap gap-1.5">
             {unavailable && <UnavailableBadge note={item.unavailableNote} />}
@@ -43,13 +52,17 @@ export function ItemDetail({ ctx, headingLevel = 'h1' }: { ctx: ItemContext; hea
 
         <div className="flex min-w-0 flex-col gap-6">
           <header className="flex flex-col gap-1">
-            <Title
-              id={headingLevel === 'h2' ? MODAL_TITLE_ID : undefined}
-              className="text-[30px] leading-heading font-bold text-fg sm:text-4xl"
-              data-item-name
-            >
-              {item.nameAr}
-            </Title>
+            {shared ? (
+              <SharedTarget slug={item.slug} kind="title" className="w-fit">
+                <h2 id={modalTitleId(item.slug)} className="text-[30px] leading-heading font-bold text-fg sm:text-4xl" data-item-name>
+                  {item.nameAr}
+                </h2>
+              </SharedTarget>
+            ) : (
+              <Title className="text-[30px] leading-heading font-bold text-fg sm:text-4xl" data-item-name>
+                {item.nameAr}
+              </Title>
+            )}
             <En className="font-cairo-light text-sm leading-ui text-muted">{item.nameEn}</En>
             {item.taglineAr && <p className="mt-2 text-base leading-ar text-fg/85">{item.taglineAr}</p>}
             {item.taglineEn && (

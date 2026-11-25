@@ -33,7 +33,14 @@ Full brief: `docs/BRIEF.md` (authoritative). Brand tokens: `docs/brand-tokens.md
   `updateTag`. Firestore/Storage rules deny all client writes.
 - Firestore Timestamps become ISO strings at the repo boundary (`src/server/repos/`).
 - Motion tokens: ease `[0.16,1,0.3,1]`, springs `{420,32}` / `{140,20}`, durations 180/320/600ms.
-  Animate transform/opacity only, and respect `MotionConfig reducedMotion="user"`.
+  Animate transform/opacity only, and respect reduced motion.
+- **Public pages use no `motion` import.** Use CSS (view timelines), rAF or WAAPI (`src/components/motion/`).
+  `motion` (with `MotionProvider`) is only for lazily loaded surfaces (rating sheet, admin).
+  Keep `/` ≤ 180 KB gzip; check with `node scripts/perf/measure-js.mjs http://localhost:3100/` after `next start`.
+- Cache Components + Activity: hidden routes stay mounted. Never keep "closing/open" UI state in React
+  state; reset it in a layout effect. Ids must be unique across routes.
+- Item deep-link 404s come from `src/proxy.ts`: a request-time `notFound()` streams with status 200.
+  The intercepted modal route is intentionally not prerendered (stale ISR entries there 404 the first navigation).
 - Commits use Conventional Commits, one per phase step.
 
 ## Guardrails (non-negotiable)

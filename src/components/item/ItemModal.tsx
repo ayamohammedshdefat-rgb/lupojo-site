@@ -1,51 +1,54 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { m, useDragControls, type PanInfo } from 'motion/react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, useSyncExternalStore, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { ar } from '@/i18n/ar';
-import { DURATION, EASE, SPRING_SOFT } from '@/lib/motion-tokens';
-import { MODAL_TITLE_ID } from './modal-ids';
-
-const SHEET_QUERY = '(max-width: 767.98px)';
-
-function useIsSheet() {
-  return useSyncExternalStore(
-    (cb) => {
-      const mq = window.matchMedia(SHEET_QUERY);
-      mq.addEventListener('change', cb);
-      return () => mq.removeEventListener('change', cb);
-    },
-    () => window.matchMedia(SHEET_QUERY).matches,
-    () => true,
-  );
-}
+import { hasFreshSource, MODAL_CLOSING_EVENT } from '@/components/motion/shared-element';
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
+const EXIT_MS = 300;
 
 /**
  * Intercepted-route modal shell: bottom sheet (drag the handle down to dismiss) below 768px,
- * centered dialog above. Back button, Esc and backdrop close it (router.back). Focus is trapped and
- * restored to the opener; page scroll is locked via html[data-modal-open].
+ * centered dialog above. Esc, backdrop, close button and drag play the exit animation, then
+ * router.back(). Focus is trapped and restored; page scroll is locked via html[data-modal-open].
  * Rendered by a layout above [slug], so it stays mounted while the user pages between items.
+ * Motion is CSS + Web Animations only (no animation library on the public critical path).
  */
 export function ItemModal({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
-  const isSheet = useIsSheet();
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const dragControls = useDragControls();
+  const rootRef = useRef<HTMLDivElement>(null);
   const closing = useRef(false);
+  const drag = useRef<{ start: number; last: number; t: number; v: number; dy: number } | null>(null);
 
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
-    router.back();
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      router.back();
+      return;
+    }
+    window.dispatchEvent(new Event(MODAL_CLOSING_EVENT));
+    if (rootRef.current) rootRef.current.dataset.state = 'closing';
+    window.setTimeout(() => router.back(), EXIT_MS);
   }, [router]);
+
+  // Runs on mount AND every time Activity reveals a preserved (hidden) modal: reset the shell.
+  // State lives on DOM attributes, so a modal hidden mid-exit never comes back half-closed.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    closing.current = false;
+    root.dataset.state = 'open';
+    // Entry: fade when a card is about to fly in, otherwise the sheet slides up.
+    root.dataset.entry = hasFreshSource(window.location.pathname.split('/').pop() ?? '') ? 'fade' : 'slide';
+    panelRef.current?.style.removeProperty('transform');
+    panelRef.current?.style.removeProperty('transition');
+  }, []);
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
@@ -60,12 +63,6 @@ export function ItemModal({ children }: { children: ReactNode }) {
       if (opener?.isConnected) opener.focus({ preventScroll: true });
     };
   }, []);
-
-  // Paging to another item: re-arm close and start the new item at the top.
-  useEffect(() => {
-    closing.current = false;
-    scrollRef.current?.scrollTo({ top: 0 });
-  }, [pathname]);
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -87,45 +84,67 @@ export function ItemModal({ children }: { children: ReactNode }) {
     }
   };
 
-  const onDragEnd = (_: unknown, info: PanInfo) => {
-    if (info.offset.y > 140 || info.velocity.y > 700) close();
+  // Sheet drag (handle only): follows the finger, dismisses past 140px or on a fast flick.
+  const onHandleDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!window.matchMedia('(max-width: 767.98px)').matches || !panelRef.current) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    panelRef.current.style.transition = 'none';
+    drag.current = { start: e.clientY, last: e.clientY, t: e.timeStamp, v: 0, dy: 0 };
+  };
+  const onHandleMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    const panel = panelRef.current;
+    if (!d || !panel) return;
+    d.v = (e.clientY - d.last) / Math.max(1, e.timeStamp - d.t);
+    d.last = e.clientY;
+    d.t = e.timeStamp;
+    const raw = e.clientY - d.start;
+    d.dy = raw > 0 ? raw : raw * 0.15;
+    panel.style.transform = `translateY(${d.dy}px)`;
+  };
+  const onHandleUp = () => {
+    const d = drag.current;
+    const panel = panelRef.current;
+    drag.current = null;
+    if (!d || !panel) return;
+    panel.style.transition = '';
+    if (d.dy > 140 || d.v > 0.7) {
+      panel.style.transform = 'translateY(100%)';
+      close();
+    } else {
+      panel.style.transform = '';
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6" onKeyDown={onKeyDown}>
-      <m.div
+    <div
+      ref={rootRef}
+      className="lupo-modal fixed inset-0 z-50 flex items-end justify-center md:items-center md:p-6"
+      data-state="open"
+      onKeyDown={onKeyDown}
+      suppressHydrationWarning
+    >
+      <div
         aria-hidden="true"
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: DURATION.base, ease: EASE }}
+        className="lupo-modal__backdrop absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={close}
         data-modal-backdrop
       />
-      <m.div
+      <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={MODAL_TITLE_ID}
         tabIndex={-1}
         data-item-modal
-        className="glass-strong relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] shadow-card outline-none md:max-h-[88dvh] md:max-w-[1000px] md:rounded-[32px]"
-        initial={isSheet ? { y: '100%' } : { opacity: 0, scale: 0.96, y: 16 }}
-        animate={isSheet ? { y: 0 } : { opacity: 1, scale: 1, y: 0 }}
-        exit={isSheet ? { y: '100%' } : { opacity: 0, scale: 0.96, y: 16 }}
-        transition={isSheet ? { type: 'spring', stiffness: 380, damping: 38 } : SPRING_SOFT}
-        drag={isSheet ? 'y' : false}
-        dragControls={dragControls}
-        dragListener={false}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0, bottom: 0.6 }}
-        onDragEnd={onDragEnd}
+        className="lupo-modal__panel glass-strong relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-[32px] shadow-card outline-none md:max-h-[88dvh] md:max-w-[1000px] md:rounded-[32px]"
       >
         <div
           aria-hidden="true"
           className="flex h-7 shrink-0 cursor-grab touch-none items-center justify-center active:cursor-grabbing md:hidden"
-          onPointerDown={(e) => dragControls.start(e)}
+          onPointerDown={onHandleDown}
+          onPointerMove={onHandleMove}
+          onPointerUp={onHandleUp}
+          onPointerCancel={onHandleUp}
         >
           <span className="h-1.5 w-11 rounded-full bg-white/25" />
         </div>
@@ -144,7 +163,7 @@ export function ItemModal({ children }: { children: ReactNode }) {
         >
           {children}
         </div>
-      </m.div>
+      </div>
     </div>
   );
 }

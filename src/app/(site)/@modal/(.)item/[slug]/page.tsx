@@ -5,12 +5,14 @@ import { ItemDetailSkeleton } from '@/components/item/ItemDetailSkeleton';
 import { ModalToolbar } from '@/components/item/ItemModal';
 import { PagerButtons, SwipeArea } from '@/components/item/ItemPager';
 import { ShareButton } from '@/components/item/ShareButton';
-import { getPublicItem, getPublicItemSlugs } from '@/server/repos/menu';
+import { ModalSync } from '@/components/item/ModalSync';
+import { modalTitleId } from '@/components/item/modal-ids';
+import { getPublicItem } from '@/server/repos/menu';
 
-export async function generateStaticParams() {
-  const slugs = await getPublicItemSlugs();
-  return (slugs.length ? slugs : ['__none']).map((slug) => ({ slug }));
-}
+// Not prerendered on purpose: a stale ISR entry for an interception route answers the first
+// navigation after an owner edit with a 404 (the router then falls back to a full page load).
+// The shell (layout) is static and instant; this content streams in behind the skeleton,
+// reading the tag-cached menu.
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -22,6 +24,7 @@ async function ModalItem({ params }: Props) {
   const next = ctx.next && { slug: ctx.next.slug, nameAr: ctx.next.nameAr };
   return (
     <>
+      <ModalSync titleId={modalTitleId(ctx.item.slug)} />
       <ModalToolbar>
         <PagerButtons prev={prev} next={next} />
         <ShareButton title={ctx.item.nameAr} path={`/item/${ctx.item.slug}`} />
