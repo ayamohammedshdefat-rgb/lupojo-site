@@ -1,0 +1,93 @@
+:root{--black:#0b0b0b;--panel:rgba(16,16,16,.94);--white:#f4efe8;--orange:#e86f13;--muted:#c2bbb3;--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--white);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background-image:linear-gradient(rgba(0,0,0,.36),rgba(0,0,0,.36)),url('assets/wood_background.jpg');
+  background-size:cover;background-position:center top;background-attachment:fixed;
+}
+.ar{font-family:"Noto Kufi Arabic",Tahoma,Arial,sans-serif}
+.en{font-family:Inter,system-ui,sans-serif}
+.hero{
+  min-height:66vh;padding:22px 18px 42px;display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.72));border-bottom:1px solid var(--line);text-align:center
+}
+.brand-logo-wrap{display:flex;justify-content:center}
+.brand-logo{width:min(310px,72vw);height:auto;display:block;filter:drop-shadow(0 10px 18px rgba(0,0,0,.35))}
+.hero-copy{max-width:760px;margin:28px auto 0}
+.eyebrow{color:var(--orange);font-weight:800;margin:0 0 8px;font-size:18px}
+.hero h1{font-size:clamp(42px,12vw,78px);margin:0;line-height:1.35}
+.hero-copy>.en{letter-spacing:1.3px;font-weight:800;color:#f0e8df;margin:6px 0 0}
+.hero-sub{color:#d1c8bf;font-size:15px;margin:10px 0 0}
+.category-nav{
+  position:sticky;top:0;z-index:1000;display:flex;direction:rtl;gap:9px;overflow-x:auto;padding:10px 12px;
+  background:rgba(8,8,8,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);scrollbar-width:none
+}
+.category-nav::-webkit-scrollbar{display:none}
+.category-nav a{
+  flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;color:var(--white);text-decoration:none;background:#141414
+}
+.category-nav a:first-child{border-color:var(--orange)}
+.category-nav a span{display:flex;flex-direction:column;line-height:1.25}
+.category-nav b{font-size:12px}
+.category-nav small{font-size:9px;color:#bcb5ad;letter-spacing:.5px}
+section[id]{scroll-margin-top:72px}
+.menu-section{padding:34px 14px 44px;background:rgba(6,6,6,.52)}
+.wood-panel{background:rgba(18,10,5,.42)}
+.section-title{display:flex;align-items:center;gap:10px;max-width:1100px;margin:0 auto 18px}
+.section-title h2{margin:0;font-size:29px;line-height:1.3}
+.section-en{display:block;color:var(--orange);font-family:Anton,sans-serif;font-size:18px;letter-spacing:1.2px;margin-top:2px}
+.icon{font-size:28px}
+.grid{display:grid;grid-template-columns:1fr;gap:17px;max-width:1100px;margin:0 auto}
+.card{
+  background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  box-shadow:0 12px 32px rgba(0,0,0,.32)
+}
+.card img{width:100%;aspect-ratio:16/11;object-fit:cover;display:block}
+.card-body{padding:17px}
+.card h3{margin:0;color:var(--orange);font-family:Anton,sans-serif;font-size:27px;letter-spacing:.7px;text-align:left}
+.item-ar{font-size:18px;font-weight:800;margin:5px 0 15px;color:#fff}
+.prices{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.prices div{padding:11px;border-radius:12px;background:rgba(0,0,0,.52);border:1px solid rgba(255,255,255,.07)}
+.prices span{display:block}
+.prices b{display:block;font-size:12px;color:#fff}
+.prices small{display:block;font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.5px}
+.prices strong{display:block;font-size:18px;margin-top:7px;color:#fff}
+.single-price{display:inline-block;padding:9px 13px;border:1px solid rgba(232,111,19,.7);border-radius:10px;color:var(--orange);font-weight:800;font-size:20px}
+.extras{background:rgba(5,5,5,.70)}
+.extras-list{max-width:760px;margin:0 auto;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:rgba(12,12,12,.88)}
+.extra-row{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px dashed rgba(255,255,255,.16)}
+.extra-row:last-child{border-bottom:0}
+.extra-row>div{display:flex;align-items:center;gap:10px}
+.extra-row strong{display:block;font-size:14px}
+.extra-row small{display:block;color:var(--muted);font-size:9px;margin-top:3px;letter-spacing:.6px}
+.extra-row>span{color:var(--orange);font-weight:800}
+.emoji{font-size:22px}
+.cta{text-align:center;padding:48px 18px 54px;background:rgba(5,5,5,.68)}
+.cta p{color:var(--orange);font-weight:800;margin:0;font-size:18px}
+.cta h2{margin:3px 0 6px;font-size:40px}
+.cta>span{display:block;color:#eee;font-weight:800;letter-spacing:1px}
+.cta small{display:block;color:#bdb5ad;margin-top:8px}
+footer{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:28px 15px 34px;background:rgba(5,5,5,.82);border-top:1px solid var(--line)}
+footer strong{color:var(--orange);font-size:23px}
+footer span{font-size:11px;letter-spacing:1.5px}
+footer small{color:#a69f98}
+@media(min-width:720px){
+  .hero{padding:30px 40px 52px}.menu-section{padding:52px 28px 62px}.grid{grid-template-columns:repeat(2,1fr)}
+  .sides-grid{grid-template-columns:repeat(3,1fr)}.brand-logo{width:330px}
+}
+@media(min-width:1024px){
+  .hero{min-height:600px;padding-left:max(60px,calc((100vw - 1100px)/2));padding-right:max(60px,calc((100vw - 1100px)/2))}
+}
+
+/* Requested LUPO order: copy -> large logo -> category buttons */
+.lupo-final{min-height:auto!important;padding:30px 16px 16px!important;display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important}
+.lupo-final .hero-copy{margin:0 auto 24px!important}
+.lupo-final .tagline{font-size:clamp(22px,5.6vw,32px)!important;font-weight:900!important;line-height:1.2!important;margin:0 0 14px!important}
+.lupo-final .hero-sub{margin:8px 0 0!important}
+.final-logo{width:100%!important;margin:0 auto!important;display:flex!important;justify-content:center!important}
+.final-logo .brand-logo{width:min(620px,94vw)!important;max-width:620px!important;height:auto!important;max-height:none!important;display:block!important}
+.lupo-final + .category-nav{position:relative!important;top:auto!important;margin:8px auto 26px!important;z-index:5!important}
+@media(max-width:719px){.lupo-final{padding-top:26px!important}.final-logo .brand-logo{width:94vw!important}.lupo-final + .category-nav{margin-top:4px!important}}
