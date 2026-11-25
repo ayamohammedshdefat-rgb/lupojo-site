@@ -4,7 +4,9 @@ import { adminDb } from '../firebase-admin';
 import { TAGS } from '../tags';
 import { average, emptyStats, isTopRated } from '../stats';
 import { mapItem, mapSection, mapSettings, mapStats } from './mappers';
-import type { MenuItem, MenuSection, PublicMenu, SiteSettings } from '@/types/menu';
+import type { ItemContext, MenuItem, MenuSection, PublicMenu, SiteSettings } from '@/types/menu';
+
+export type { ItemContext };
 
 /**
  * The public menu: visible sections with their visible items (ordered) and rating stats.
@@ -47,14 +49,6 @@ export async function getPublicMenu(): Promise<PublicMenu> {
 export async function getSiteSettings(): Promise<SiteSettings> {
   return (await getPublicMenu()).settings;
 }
-
-export type ItemContext = {
-  item: MenuItem;
-  section: MenuSection;
-  prev: MenuItem | null;
-  next: MenuItem | null;
-  related: MenuItem[];
-};
 
 /** A visible item by slug with its section neighbours and related items; null when hidden/missing. */
 export async function getPublicItem(slug: string): Promise<ItemContext | null> {

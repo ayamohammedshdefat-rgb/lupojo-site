@@ -107,6 +107,7 @@
   --font-*: initial;
   --font-sans: var(--font-cairo);
   --font-display: var(--font-cairo);
+  --font-mono: var(--font-cairo);
 }
 
 /* ------------------------------------------------------------------
@@ -186,11 +187,18 @@
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
-    scroll-padding-top: 88px;
+    /* Single source for anchor offsets: header (56) + chips (~62) on mobile, header only on desktop. */
+    scroll-padding-top: 128px;
+
+    @media (min-width: 1024px) {
+      scroll-padding-top: 88px;
+    }
   }
 
   body {
     min-height: 100dvh;
+    /* Safety net against accidental horizontal scroll (clip keeps position: sticky working). */
+    overflow-x: clip;
     background-color: var(--color-canvas);
     line-height: var(--leading-ar);
     font-weight: 400;
@@ -218,7 +226,11 @@
     line-height: var(--leading-ui);
   }
 
-  [lang='en'] {
+  [lang='en'],
+  code,
+  kbd,
+  samp,
+  pre {
     font-family: var(--font-sans);
   }
 
@@ -257,4 +269,78 @@
   opacity: 0.045;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
+}
+
+/* ------------------------------------------------------------------
+ * Components
+ * ------------------------------------------------------------------ */
+
+/* Scroll lock while an item modal/sheet is open (derived from the route, Activity-safe). */
+html[data-modal-open='true'] {
+  overflow: hidden;
+  padding-inline-end: var(--scrollbar-gap, 0px);
+}
+
+/* Giant outlined English word behind section titles. */
+.lupo-outline-word {
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(255 255 255 / 0.09);
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+/* Card hover: the image lifts and zooms slightly (hover-capable devices only). */
+@media (hover: hover) {
+  .lupo-card:hover .lupo-media {
+    transform: scale(1.06);
+  }
+}
+
+/* Flame flicker on the word "بشغف". */
+.lupo-flicker {
+  display: inline-block;
+  text-shadow: 0 0 18px rgb(239 135 21 / 0.55);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lupo-flicker {
+    animation: lupo-flicker 2.8s steps(1, end) infinite;
+  }
+}
+@keyframes lupo-flicker {
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 18px rgb(239 135 21 / 0.55);
+  }
+  12% {
+    opacity: 0.86;
+    text-shadow: 0 0 10px rgb(239 135 21 / 0.35);
+  }
+  18% {
+    opacity: 1;
+    text-shadow: 0 0 24px rgb(255 194 61 / 0.6);
+  }
+  57% {
+    opacity: 0.92;
+  }
+  63% {
+    opacity: 1;
+  }
+}
+
+/* Print (A4): the classic menu prints cleanly on white paper. */
+@page {
+  size: A4;
+  margin: 12mm;
+}
+@media print {
+  .lupo-grain,
+  [role='status'] {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
 }

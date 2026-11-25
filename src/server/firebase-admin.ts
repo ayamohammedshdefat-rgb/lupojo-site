@@ -16,6 +16,8 @@ if (USE_EMULATORS) {
   process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8080';
   process.env.FIREBASE_AUTH_EMULATOR_HOST ||= '127.0.0.1:9099';
   process.env.FIREBASE_STORAGE_EMULATOR_HOST ||= '127.0.0.1:9199';
+  // No real credentials locally: don't probe the GCE metadata server (avoids timeouts and warnings).
+  process.env.METADATA_SERVER_DETECTION ||= 'none';
 }
 
 type AdminGlobal = { __lupoAdmin?: { app: App; db: Firestore } };

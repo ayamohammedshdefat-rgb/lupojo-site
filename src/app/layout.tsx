@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { cairo, cairoThin } from '@/lib/fonts';
 import { MotionProvider } from '@/components/motion/MotionProvider';
+import { Toaster } from '@/components/ui/toast';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="ar" dir="rtl" className={`${cairo.variable} ${cairoThin.variable}`}>
       <body className="bg-canvas font-sans text-fg antialiased">
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          {children}
+          <Toaster />
+        </MotionProvider>
         <div className="lupo-grain" aria-hidden="true" />
       </body>
     </html>

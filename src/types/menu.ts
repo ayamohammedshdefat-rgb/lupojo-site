@@ -109,3 +109,11 @@ export type ApprovedComment = {
   comment: string;
   createdAt: string;
 };
+
+export type ItemContext = {
+  item: MenuItem;
+  section: MenuSection;
+  prev: MenuItem | null;
+  next: MenuItem | null;
+  related: MenuItem[];
+};

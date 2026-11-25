@@ -14,6 +14,7 @@ export const ar = {
     retry: 'حاول مرة أخرى',
     backToTop: 'العودة للأعلى',
     skipToMenu: 'تخطَّ إلى المنيو',
+    print: 'طباعة',
     currency: 'JD',
   },
   intro: {
@@ -23,6 +24,7 @@ export const ar = {
     browse: 'تصفّح المنيو',
     sectionsNav: 'أقسام المنيو',
     classic: 'المنيو الكلاسيكي',
+    empty: 'المنيو قيد التحضير.',
     itemsCount: (n: number) => (n === 1 ? 'صنف واحد' : n === 2 ? 'صنفان' : n <= 10 ? `${n} أصناف` : `${n} صنفًا`),
   },
   search: {
@@ -34,6 +36,7 @@ export const ar = {
   },
   item: {
     new: 'جديد',
+    featured: 'مميز',
     unavailable: 'غير متوفر حاليًا',
     topRated: 'الأعلى تقييمًا',
     calories: 'سعرة حرارية',
