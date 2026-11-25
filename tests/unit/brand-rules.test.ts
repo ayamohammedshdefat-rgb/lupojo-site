@@ -67,7 +67,7 @@ describe('brand rules', () => {
 
   it('marks every server module with server-only', () => {
     const serverFiles = codeFiles.filter((f) => rel(f).startsWith('src/server/'));
-    const offenders = serverFiles.filter((f) => !/^(?:\/\*[\s\S]*?\*\/\s*|\/\/.*\n\s*)*import 'server-only';/.test(readFileSync(f, 'utf8'))).map(rel);
+    const offenders = serverFiles.filter((f) => !/^(?:\/\*[\s\S]*?\*\/\s*|\/\/.*\n\s*|'use server';\s*)*import 'server-only';/.test(readFileSync(f, 'utf8'))).map(rel);
     expect(offenders).toEqual([]);
   });
 });

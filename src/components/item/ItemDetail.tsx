@@ -1,7 +1,9 @@
-import { Flame, MessageSquareText } from 'lucide-react';
+import { Flame } from 'lucide-react';
 import { ItemMedia } from './ItemMedia';
 import { PricePills } from './PricePills';
 import { RatingSummary } from './RatingSummary';
+import { ReviewsList } from './ReviewsList';
+import { getApprovedComments } from '@/server/repos/reviews';
 import { RelatedRow } from './RelatedRow';
 import { modalTitleId } from './modal-ids';
 import { SharedTarget } from '@/components/motion/shared-element';
@@ -13,8 +15,9 @@ import { formatInt } from '@/lib/format';
 import type { ItemContext } from '@/types/menu';
 
 /** Item detail shared by the modal/sheet and the full page. Only real content is shown: no placeholders. */
-export function ItemDetail({ ctx, headingLevel = 'h1' }: { ctx: ItemContext; headingLevel?: 'h1' | 'h2' }) {
+export async function ItemDetail({ ctx, headingLevel = 'h1' }: { ctx: ItemContext; headingLevel?: 'h1' | 'h2' }) {
   const { item } = ctx;
+  const comments = await getApprovedComments(item.id);
   const unavailable = item.availability === 'unavailable';
   const Title = headingLevel;
   // In the modal (h2) the image and title are shared elements that fly in from the card.
@@ -102,18 +105,13 @@ export function ItemDetail({ ctx, headingLevel = 'h1' }: { ctx: ItemContext; hea
 
           <RateCta itemId={item.id} itemName={item.nameAr} unavailable={unavailable} />
 
-          {item.stats.count > 0 && <RatingSummary stats={item.stats} avg={item.avg} />}
+          <RatingSummary itemId={item.id} stats={item.stats} avg={item.avg} />
 
           <section aria-labelledby="reviews-title" className="flex flex-col gap-3" data-reviews>
             <h3 id="reviews-title" className="text-lg leading-heading font-bold text-fg">
               {ar.item.reviewsTitle}
             </h3>
-            {item.stats.approvedComments === 0 && (
-              <div className="glass flex items-center gap-3 rounded-[22px] p-4 text-sm leading-ar text-muted">
-                <MessageSquareText size={22} strokeWidth={1.75} className="shrink-0 text-accent-hi" aria-hidden="true" />
-                {ar.item.noReviews}
-              </div>
-            )}
+            <ReviewsList itemId={item.id} initial={comments.comments} initialCursor={comments.nextCursor} />
           </section>
         </div>
       </article>
