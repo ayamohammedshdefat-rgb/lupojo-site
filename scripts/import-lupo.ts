@@ -6,12 +6,13 @@
  *   npm run seed -- --reset          # emulators: wipe collections + public images first
  *   npm run seed -- --overwrite      # re-apply seed fields to existing docs
  *   npm run seed:prod -- --project <id> --confirm
+ *   ... --local-images   # no Cloud Storage yet: photos go to public/menu/ (served with the site)
  *
  * Item photos are downloaded from the live site (falling back to the archived copies in
  * reference/original/site/assets) and re-encoded with sharp. The logo is the vector master
  * traced from the live site's logo (public/brand/lupo-logo.svg, see scripts/brand/logo.ts).
  */
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { flag, resolveTarget } from './lib/cli';
 
@@ -31,6 +32,7 @@ type Seed = { site: Record<string, unknown> & { logoUrl?: string }; sections: Se
 const target = resolveTarget();
 const overwrite = flag('overwrite');
 const reset = flag('reset');
+const localImages = flag('local-images');
 
 async function fetchImage(url: string): Promise<Buffer> {
   try {
@@ -69,12 +71,14 @@ async function main() {
   const settingsRef = db.doc('settings/site');
   const settingsSnap = await settingsRef.get();
   if (!settingsSnap.exists || overwrite) {
-    const svg = await readFile('public/brand/lupo-logo.svg');
-    const logo = await uploadStaticAsset(svg, 'public/brand/lupo-logo.svg', 'image/svg+xml', {
-      width: 1376,
-      height: 404,
-      alt: 'LUPO Smash Burgers',
-    });
+    // With --local-images the bundled /brand/lupo-logo.svg is used (logo: null).
+    const logo = localImages
+      ? null
+      : await uploadStaticAsset(await readFile('public/brand/lupo-logo.svg'), 'public/brand/lupo-logo.svg', 'image/svg+xml', {
+          width: 1376,
+          height: 404,
+          alt: 'LUPO Smash Burgers',
+        });
     const { logoUrl: _logoUrl, ...site } = seed.site;
     await settingsRef.set({ ...site, logo, contact: {}, updatedAt: now, updatedBy: 'seed' }, { merge: true });
     console.log('settings/site: written');
@@ -109,7 +113,23 @@ async function main() {
         let image;
         if (item.image) {
           const processed = await processImage(await fetchImage(item.image));
-          image = await uploadPublicImage(processed, 'items', item.slug, `${item.nameAr} — ${item.nameEn}`);
+          const alt = `${item.nameAr} — ${item.nameEn}`;
+          if (localImages) {
+            // No Cloud Storage yet: ship the WebP with the site (public/menu) and reference it.
+            const file = `${item.slug}-${processed.hash}.webp`;
+            await mkdir('public/menu', { recursive: true });
+            await writeFile(`public/menu/${file}`, processed.data);
+            image = {
+              url: `/menu/${file}`,
+              path: `local:/menu/${file}`,
+              width: processed.width,
+              height: processed.height,
+              blurDataURL: processed.blurDataURL,
+              alt,
+            };
+          } else {
+            image = await uploadPublicImage(processed, 'items', item.slug, alt);
+          }
         }
         const data = {
           slug: item.slug,

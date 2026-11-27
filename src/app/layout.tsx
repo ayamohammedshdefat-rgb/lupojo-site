@@ -5,6 +5,7 @@ import { HydrationMarker } from '@/components/ui/HydrationMarker';
 import './globals.css';
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: 'LUPO | المنيو',
   description: 'منيو LUPO — برجر، إضافات، مشروبات وصوصات.',
 };
