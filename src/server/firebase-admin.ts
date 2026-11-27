@@ -3,6 +3,7 @@ import { cert, getApps, initializeApp, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { normalizePrivateKey } from './credentials';
 
 /**
  * Admin SDK singleton. Emulators are used whenever NEXT_PUBLIC_USE_EMULATORS=true
@@ -33,8 +34,15 @@ function credentialOptions() {
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY;
   if (clientEmail && privateKey) {
-    // Dashboards often store the PEM with literal "\n" sequences; normalize them.
-    return { credential: cert({ projectId: PROJECT_ID, clientEmail, privateKey: privateKey.replace(/\\n/g, '\n') }) };
+    try {
+      return { credential: cert({ projectId: PROJECT_ID, clientEmail: clientEmail.trim(), privateKey: normalizePrivateKey(privateKey) }) };
+    } catch (err) {
+      // Never print the key itself; say which variable to fix.
+      throw new Error(
+        `FIREBASE_PRIVATE_KEY could not be parsed (${err instanceof Error ? err.message.split('\n')[0] : 'invalid key'}). ` +
+          'Paste the private_key value from the service-account JSON again.',
+      );
+    }
   }
   const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
   if (!b64) return {}; // Falls back to Application Default Credentials (e.g. on GCP).
