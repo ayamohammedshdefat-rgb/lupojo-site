@@ -30,5 +30,7 @@ export function resolveTarget(): Target {
     process.exit(2);
   }
   process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID = projectId;
+  // Projects created since late 2024 use <id>.firebasestorage.app; override with --bucket if needed.
+  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET = arg('bucket') || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.firebasestorage.app`;
   return { prod: true, projectId };
 }

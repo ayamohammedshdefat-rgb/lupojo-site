@@ -6,11 +6,16 @@ import { getStorage } from 'firebase-admin/storage';
 
 /**
  * Admin SDK singleton. Emulators are used whenever NEXT_PUBLIC_USE_EMULATORS=true
- * (development and tests); production reads FIREBASE_SERVICE_ACCOUNT_BASE64.
+ * (development and tests). Production credentials, in order of preference:
+ *  1. FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (small: fits Netlify/AWS Lambda's 4 KB env limit)
+ *  2. FIREBASE_SERVICE_ACCOUNT_BASE64 (whole service-account JSON, base64)
+ *  3. Application Default Credentials (GOOGLE_APPLICATION_CREDENTIALS file, or GCP runtime)
  */
 export const USE_EMULATORS = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
 export const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'demo-lupo';
-export const STORAGE_BUCKET = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${PROJECT_ID}.appspot.com`;
+export const STORAGE_BUCKET =
+  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+  (USE_EMULATORS ? `${PROJECT_ID}.appspot.com` : `${PROJECT_ID}.firebasestorage.app`);
 
 if (USE_EMULATORS) {
   process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8080';
@@ -25,6 +30,12 @@ const g = globalThis as AdminGlobal;
 
 function credentialOptions() {
   if (USE_EMULATORS) return {};
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  if (clientEmail && privateKey) {
+    // Dashboards often store the PEM with literal "\n" sequences; normalize them.
+    return { credential: cert({ projectId: PROJECT_ID, clientEmail, privateKey: privateKey.replace(/\\n/g, '\n') }) };
+  }
   const b64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
   if (!b64) return {}; // Falls back to Application Default Credentials (e.g. on GCP).
   const json = JSON.parse(Buffer.from(b64, 'base64').toString('utf8')) as {

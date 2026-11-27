@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "demo-lupo"
+    "default": "demo-lupo",
+    "prod": "lupo-menu"
   }
 }
