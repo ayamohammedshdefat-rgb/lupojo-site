@@ -3,12 +3,13 @@ import { cert, getApps, initializeApp, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
-import { normalizePrivateKey } from './credentials';
+import { extractServiceAccountEmail, normalizePrivateKey } from './credentials';
 
 /**
  * Admin SDK singleton. Emulators are used whenever NEXT_PUBLIC_USE_EMULATORS=true
  * (development and tests). Production credentials, in order of preference:
- *  1. FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (small: fits Netlify/AWS Lambda's 4 KB env limit)
+ *  1. FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY_BASE64 (or the raw FIREBASE_PRIVATE_KEY PEM);
+ *     small enough for Netlify/AWS Lambda's 4 KB env limit
  *  2. FIREBASE_SERVICE_ACCOUNT_BASE64 (whole service-account JSON, base64)
  *  3. Application Default Credentials (GOOGLE_APPLICATION_CREDENTIALS file, or GCP runtime)
  */
@@ -31,16 +32,19 @@ const g = globalThis as AdminGlobal;
 
 function credentialOptions() {
   if (USE_EMULATORS) return {};
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
+  const rawEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
   // A base64 key is paste-proof (one line, no special characters), so it wins when present.
   const keyB64 = process.env.FIREBASE_PRIVATE_KEY_BASE64?.trim();
   const keyVar = keyB64 ? 'FIREBASE_PRIVATE_KEY_BASE64' : 'FIREBASE_PRIVATE_KEY';
   const privateKey = keyB64 ? Buffer.from(keyB64, 'base64').toString('utf8') : process.env.FIREBASE_PRIVATE_KEY;
-  if (clientEmail && privateKey) {
-    if (!/^[^@\s]+@[^@\s]+\.iam\.gserviceaccount\.com$/.test(clientEmail)) {
-      // Never print secrets: only a length, so a swapped value is easy to spot.
+  if (rawEmail && privateKey) {
+    const clientEmail = extractServiceAccountEmail(rawEmail);
+    if (!clientEmail) {
+      // Never print values: only shape hints, so a swapped or truncated value is easy to spot.
       throw new Error(
-        `FIREBASE_CLIENT_EMAIL does not look like a service-account email (length ${clientEmail.length}). ` +
+        `FIREBASE_CLIENT_EMAIL does not contain exactly one service-account email (length ${rawEmail.length}, ` +
+          `'@' ${rawEmail.includes('@') ? 'present' : 'missing'}, ` +
+          `'.iam.gserviceaccount.com' ${rawEmail.includes('.iam.gserviceaccount.com') ? 'present' : 'missing'}). ` +
           'Use the client_email value from the service-account JSON.',
       );
     }

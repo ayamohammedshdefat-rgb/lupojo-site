@@ -16,3 +16,15 @@ export function normalizePrivateKey(raw: string): string {
   const lines = body.match(/.{1,64}/g) ?? [];
   return `-----BEGIN ${label}-----\n${lines.join('\n')}\n-----END ${label}-----\n`;
 }
+
+const SERVICE_ACCOUNT_EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.iam\.gserviceaccount\.com/g;
+
+/**
+ * Finds the service-account email inside a pasted dashboard value. Tolerates quotes, a
+ * `"client_email":` prefix, stray whitespace or the same email pasted twice. Returns null when
+ * there is no service-account email or more than one distinct one.
+ */
+export function extractServiceAccountEmail(raw: string): string | null {
+  const found = new Set(raw.match(SERVICE_ACCOUNT_EMAIL) ?? []);
+  return found.size === 1 ? [...found][0]! : null;
+}
