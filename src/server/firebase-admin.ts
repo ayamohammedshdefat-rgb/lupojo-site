@@ -31,16 +31,27 @@ const g = globalThis as AdminGlobal;
 
 function credentialOptions() {
   if (USE_EMULATORS) return {};
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim();
+  // A base64 key is paste-proof (one line, no special characters), so it wins when present.
+  const keyB64 = process.env.FIREBASE_PRIVATE_KEY_BASE64?.trim();
+  const keyVar = keyB64 ? 'FIREBASE_PRIVATE_KEY_BASE64' : 'FIREBASE_PRIVATE_KEY';
+  const privateKey = keyB64 ? Buffer.from(keyB64, 'base64').toString('utf8') : process.env.FIREBASE_PRIVATE_KEY;
   if (clientEmail && privateKey) {
-    try {
-      return { credential: cert({ projectId: PROJECT_ID, clientEmail: clientEmail.trim(), privateKey: normalizePrivateKey(privateKey) }) };
-    } catch (err) {
-      // Never print the key itself; say which variable to fix.
+    if (!/^[^@\s]+@[^@\s]+\.iam\.gserviceaccount\.com$/.test(clientEmail)) {
+      // Never print secrets: only a length, so a swapped value is easy to spot.
       throw new Error(
-        `FIREBASE_PRIVATE_KEY could not be parsed (${err instanceof Error ? err.message.split('\n')[0] : 'invalid key'}). ` +
-          'Paste the private_key value from the service-account JSON again.',
+        `FIREBASE_CLIENT_EMAIL does not look like a service-account email (length ${clientEmail.length}). ` +
+          'Use the client_email value from the service-account JSON.',
+      );
+    }
+    try {
+      return { credential: cert({ projectId: PROJECT_ID, clientEmail, privateKey: normalizePrivateKey(privateKey) }) };
+    } catch (err) {
+      const hasMarker = /-----BEGIN [A-Z ]*PRIVATE KEY-----/.test(privateKey);
+      throw new Error(
+        `${keyVar} could not be parsed (${err instanceof Error ? err.message.split('\n')[0] : 'invalid key'}; ` +
+          `decoded length ${privateKey.length}, PEM header ${hasMarker ? 'present' : 'missing'}). ` +
+          'Set it again from the private_key value of the service-account JSON.',
       );
     }
   }
