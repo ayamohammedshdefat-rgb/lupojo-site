@@ -75,7 +75,7 @@ export function Toaster() {
     <div
       aria-live="polite"
       role="status"
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[80] flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 top-[calc(0.75rem+env(safe-area-inset-top))] z-[80] flex justify-center px-4"
     >
       <ul className="flex w-full max-w-md flex-col gap-2">
         {list.map((t) => (
