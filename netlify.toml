@@ -6,9 +6,9 @@
 #   (functions share a 4 KB env budget, so use the two small vars, not the base64 JSON)
 #   (optional) NEXT_PUBLIC_TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
 # The build prerenders the menu, so it needs the production Firestore (already seeded) to be reachable.
+# No publish directory: the Next.js adapter sets it. A manual ".next" serves the build folder as static files and breaks routes.
 [build]
   command = "npm run build"
-  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "24"
