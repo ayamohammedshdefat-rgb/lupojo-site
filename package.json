@@ -17,13 +17,14 @@
     "seed": "tsx --conditions=react-server scripts/import-lupo.ts",
     "seed:prod": "tsx --conditions=react-server scripts/import-lupo.ts --prod",
     "set-role": "tsx --conditions=react-server scripts/set-role.ts",
-    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage",
+    "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes,storage --project prod",
     "brand:logo": "tsx scripts/brand/logo.ts",
     "capture": "tsx scripts/reference/capture.ts",
     "e2e:run": "npm run seed -- --reset && playwright test",
     "test:rules:attached": "vitest run --config vitest.rules.config.mts",
     "perf:js": "node scripts/perf/measure-js.mjs",
-    "checkpoint": "tsx scripts/reference/checkpoint.ts"
+    "checkpoint": "tsx scripts/reference/checkpoint.ts",
+    "deploy:rules:sa": "tsx --conditions=react-server scripts/deploy-rules.ts --prod --project lupo-menu --confirm"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.9",
